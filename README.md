@@ -48,7 +48,8 @@ all possible changes are made easier. **\
 popular and basic database connection driver.\
 **Uroot** is used for later in chapter for changing model parameters .
 
-![](media/image1.png){width="2.0192311898512685in" height="1.05in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/loadinglibrary.png">
+
 
 3.  **Importing data**
 
@@ -60,29 +61,28 @@ contained of **driver's name**, **server's name**, **database**, **uid**
 Then, we call stored view from server, and get raw data inside data
 variable.
 
-![](media/image2.png){width="6.733333333333333in" height="0.8in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/connection.png">
 
 Structured data is needed before procced into next step. For that we
 will remove last month's incomplete data, present sales in thousands
 values, and declare our data as time series data, by defining start
 period and frequency of our data, which, for month, is 12.
 
-![](media/image3.png){width="4.008333333333334in"
-height="1.0583333333333333in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/transformation1.png">
 
 4.  **Exploratory analysis**
 
 Our time series looks like this:
 
-![](media/image4.png){width="4.198430664916885in" height="2.925in"}
+![Explore1](https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/explore.png)
 
 From graph, we can fill there is good positive trend. There are also
 variations in our values, but in this analysis, we will not focus on
 them.\
 To inspect seasonality we will **ggseasonplot** function.
 
-![](media/image5.png){width="4.591666666666667in"
-height="3.3186067366579177in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/exploreseason.png">
+
 
 We call see that in months of December, in mid-March we have strong
 seasonality and weak in July-August.\
@@ -94,8 +94,8 @@ show all models, regards of these components.
 I choose proportion of 85:15 because of lack of data records. For each
 data partition, we need to recreate time series copy.
 
-![](media/image6.png){width="5.266666666666667in"
-height="0.7166666666666667in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/datapartition.png">
+
 
 6.  **Define model indicators**
 
@@ -127,18 +127,18 @@ naive forecast, random walk, drift method.**
 
 1.  **Mean model**
 
-> A mean model takes the mean of previous observations and uses that for
-> forecasting.\
-> **Formula**: **y~t~ = mean(y~t-x~)** x- observation of model for whole
-> period\
-> **Model**: **meanf \<- meanf(ttrain, h=6)** h- period for prediction
+A mean model takes the mean of previous observations and uses that for
+forecasting.
+**Formula**: **y~t~ = mean(y~t-x~)** x- observation of model for whole
+period
+**Model**: **meanf \<- meanf(ttrain, h=6)** h- period for prediction
 
   **SD RES**   **MAE**    **RMSE**
   ------------ ---------- ----------
   18876.63     23513.24   27318.80
+  
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/meanmodel.png">
 
-> ![](media/image7.png){width="3.9833333333333334in"
-> height="2.822415791776028in"}
 
 2.  **Naive method -- Random walk**
 
@@ -152,9 +152,7 @@ naive forecast, random walk, drift method.**
   ------------ ---------- ----------
   15495.68     14908.00   17422.21
 
-**\
-**![](media/image8.png){width="3.908333333333333in"
-height="2.6707819335083114in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/randomwalk.png">
 
 3.  **Drift method**
 
@@ -169,7 +167,7 @@ height="2.6707819335083114in"}
   ------------ ---------- ----------
   15495.68     14648.55   16021.92
 
-![](media/image9.png){width="3.856369203849519in" height="2.675in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/driftmodel.png">
 
 4.  **Seasonal naïve method**
 
@@ -182,7 +180,7 @@ height="2.6707819335083114in"}
   ------------ ---------- ----------
   16453.78     17185.17   18487.01
 
-![](media/image10.png){width="3.95in" height="2.735838801399825in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/seasonnaive.png">
 
 8.  **Exponential smoothing models -- ETS**
 
