@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1586806211845.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "76448357",
+    "id" : "2531F33F",
+    "lastKnownWriteTime" : 1586986599,
+    "last_content_update" : 1586986599688,
+    "path" : "C:/Users/Ivan/Desktop/Primena vestacke intelegencije/Primena vremenskih serija/skript.R",
+    "project_path" : "skript.R",
+    "properties" : {
+        "cursorPosition" : "71,0",
+        "scrollLine" : "47",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

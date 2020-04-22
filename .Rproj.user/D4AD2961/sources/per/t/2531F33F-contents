@@ -1,0 +1,198 @@
+######################
+#Montly sales data for 3 years and 3 months
+#We will use it for forecasting next months and year
+#Created by Ivan Mitrovic 15.04.2020
+######################
+
+
+#############################################
+##############TIME SERIES ANALISYS###########
+#############################################
+
+#clear all enviroment variables
+rm(list = ls())
+
+##################
+#Loading libraries
+##################
+
+#install.packages("fpp2")
+library(fpp2)
+#install.packages("RODBC")
+library(RODBC)
+
+###################
+#1. Import data from MS SQL Server to data frame using ODBC connection - RODBC
+###################
+
+#creating connectiuon string
+connection <- odbcDriverConnect(connection = "Driver={SQL Server Native Client 11.0};server=localhost;database=AlgrossoAnalitycs;trusted_connection=yes;")
+
+#getting data from View
+data <- sqlFetch(connection, "dbo.ProdajaPoMesecima", colnames = FALSE, rownames = TRUE)
+
+###################
+#2. First transformation phase
+###################
+
+#removing last month from data frame, which is incomplete
+data <- head(data, -1)
+
+#dividing revenue by 1000 for tracking convinience in plots
+data[,3] <- round(data[,3]/1000, digits = 0)
+  
+#declare data as time series data
+tdata <- ts(data[,3], start = c(2017,1), frequency = 12)
+
+###################
+#3. Exploratory analisis
+###################
+
+summary(tdata)
+
+autoplot(tdata) + 
+         ggtitle("Monthly sales revenue")+
+         ylab("Revenue in thousands")
+
+#Data has a trend, and we need to transform it to remove it
+plot(tdata)
+abline(reg = lm(tdata~time(tdata)))
+
+#trend line
+trend <-  predict(lm(tdata~time(tdata)))
+
+#Seasonal effects- we have highest sales revenue in month of december in every year
+boxplot(tdata~cycle(tdata))
+
+#Seasonal effects- we also have same line motions around mid mar
+#we are using first difference to remove trend 
+ggseasonplot(tdata/trend)+
+  ggtitle("Seasonal Plot: Monthly sales revenue")+
+  ylab("Revenue in thousands")
+
+###################
+#4. Second transformation phase - trend stacionary data
+###################
+
+#Take first difference of the data to remove trend,but in this case we dont removed it
+#dfdata <- diff(tdata)
+
+#Rr divide by trend to remove it, this works fine here
+dfdata <- tdata / trend
+
+autoplot(dfdata) +
+  ggtitle("Trend stationary: Monthly changes in sales revenue")+
+  ylab("Revenue in thousands")
+
+#plot of removed variance from data, not always the case
+#here we cannot remove it
+plot(log(tdata))
+
+
+#plot of removed variance and trend from data
+#data is now fully stacionary
+plot(log(dfdata))
+
+#####################################
+#5. Splitting data###################
+#####################################
+
+#85:15
+train <- tdata[1:33]
+test <- tdata[34:39]
+
+#####################################
+#5. Choosing best fitting model######
+#####################################
+
+######################
+#5.1 Seasonal naive method (y_t = y_(t-s) + e_t)
+######################
+
+snaive <- snaive(dfdata)
+print(summary(snaive))
+
+#Residual SD should be as many low as possible- 0.2442
+checkresiduals(snaive)
+
+######################
+#5.2 ETS- Exponential smoothing model
+######################
+
+#we can use regular data with trend
+ets <- ets(tdata)
+#it picked model ETS(M,A,N) 
+print(summary(ets))
+
+#sigma is 0.1837, which is considerbly lower then naive method
+checkresiduals(ets)
+
+######################
+#5.3 ARIMA model - data need to be stationary
+######################
+
+#this will try all posssible combination of arima models
+#d=1 - take 1st difference, D=1 - take 1st seasonal diff to get rid of seasonaly effects 
+#approximation is for faster getting function, but we are only working with 1 time series
+#stepwise saves time to try fewer function to fit data
+arima <- auto.arima(tdata, d=1, D=1, 
+                    stepwise = FALSE,
+                    approximation = FALSE,
+                    trace = TRUE)
+
+#Best model: ARIMA(0,1,1)(1,1,0)[12]
+
+print(summary(arima))
+
+#residual 14126
+checkresiduals(arima)
+
+#Mirkovic
+
+arima <- arima(train, order = c(0L, 1L, 1L),
+            seasonal = list(order = c(1L, 1L, 0L), period = 12))
+
+#sigma = 10906
+summary(arima)
+
+#residuals
+plot(resid(arima))
+summary(resid(arima))
+sum(resid(arima))
+
+
+
+#############################
+#5,4 Best fitting model######
+#############################
+
+#ETS
+
+########################
+#6. Forecasting#########
+########################
+
+fcst <- forecast(ets, h = 6)
+autoplot(fcst, include = 60)
+print(summary(fcst))
+
+#Mirkovic
+#we will forcasting for 6 months on test data
+y <- predict(arima, 6)
+
+#forcasting values as vector
+fcvektor <- c(y$pred[1],y$pred[2],y$pred[3],y$pred[4],y$pred[5],y$pred[6])
+
+#absolute error per every months
+test - abs(fcvektor)
+#mean absolut error
+mse <-  mean(abs(test-fcvektor))
+mse
+#mean quadrat error
+msqe <- mean((test-fcvektor)^2)
+msqe
+
+
+
+
+
