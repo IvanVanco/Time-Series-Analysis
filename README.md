@@ -102,7 +102,7 @@ data partition, we need to recreate time series copy.
 We will use tree indicators:
 
 1.  **Residual Standard Deviation** of training data **(SD res, or
-    √sigma^2^)** -- lower values are good sign, but not enough
+    √sigma<sup>2</sup>)** -- lower values are good sign, but not enough
 
 2.  **Mean Absolute Error (MAE)** of test data -- absolute prediction
     error, lower is better.
@@ -133,9 +133,9 @@ forecasting.\
 period\
 **Model**: **meanf \<- meanf(ttrain, h=6)** h- period for prediction
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  18876.63     23513.24   27318.80
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 18,876.63   | 23,513.24  | 27,318.80  |
   
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/meanmodel.png" weight="350" height="350">
 
@@ -148,9 +148,9 @@ that equals to the previous value plus a constant change.\
 **Model**: **rwf \<- rwf(ttrain, h=6)** or **naive(ttrain, h=6)** h-
 period for prediction
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  15495.68     14908.00   17422.21
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 15,495.68   | 14,908.00  | 17,422.21  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/randomwalk.png" weight="350" height="350">
 
@@ -163,9 +163,9 @@ first dynamic model.\
 **Model**: **rwd \<- rwf(ttrain, h=6, drift=TRUE)** h- period for
 prediction
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  15495.68     14648.55   16021.92
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 15,495.68   | 14,648.55  | 16,021.92  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/driftmodel.png" weight="350" height="350">
 
@@ -176,9 +176,9 @@ and testing seasonal effects on time series.\
 **Formula**: **y<sub>t</sub> = y<sub>t-s</sub>**\
 **Model**: **snaive \<- snaive(ttrain, h=6)** h- period for prediction
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  16453.78     17185.17   18487.01
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 16,453.78   | 17,185.17  | 18,487.01  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/seasonnaive.png" weight="350" height="350">
 
@@ -211,10 +211,10 @@ F<sub>t</sub> , F<sub>t-1</sub> - forecast values for time t, t-1; y<sub>t-1</su
 for time t-1; α - smoothing constant\
 **Model**: **sets \<- ses(ttrain, h=6)** h- period for prediction
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  14205.04     15507.66   18561.26
-
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 14,205.04   | 15,507.66  | 18,561.26  |
+  
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/SETS.png" weight="350" height="350">
 
 ### 8.2  **Holt-Winters exponential smoothing -- HW**
@@ -232,9 +232,9 @@ observations:\
 **Model**: **hw \<- hw(ttrain, h = 6, seasonal = "additive")** h-
 period for prediction
 
-  **SD RES**   **MAE**   **RMSE**
-  ------------ --------- ----------
-  14830.10     9482.57   15179.86
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 14,830.10   | 9,482.57   | 15,179.86  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/hw.png" weight="350" height="350">
 
@@ -254,9 +254,9 @@ The letters stand for N = none, A = additive, M = multiplicative and Z
 **Model**: **hw \<- aets \<- ets(ttrain) - It is suggesting ETS
 (M,N,N)**
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  0.1913       14908.23   17422.64
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 0,1913      | 14,908.23  | 17,422.64  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/aets.png" weight="350" height="350">
 
@@ -296,9 +296,9 @@ the ***ε<sub>t</sub>*, *ε<sub>t−1</sub>,\..., *ε<sub>t-q</sub>** are w
 terms. The value of ***q*** is called the order of the MA model. **We
 will use MA(1).**
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  12806.54     20977.35   26129.44
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 12,806.54   | 20,977.35  | 26,129.44  |
 
 **\
 ACF function is inside dashed lines, which is positive sign.**
@@ -322,9 +322,9 @@ where **β<sub>0</sub>** is constant, the **β<sub>1</sub>**, \..., **β<sub>p<
 parameters of the model and the ***ε<sub>t</sub>*** is white noise. The value
 of ***p*** is called the order of the AR model. **We will use AR(1).**
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  14152.43     20378.13   24385.42
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 14,152.43   | 20,378.13  | 24,385.42  |
 
 **\
 ACF function is inside dashed lines, which is positive sign.**
@@ -342,9 +342,9 @@ terms occurring contemporaneously and at various times in the past.\
 +ϵ<sub>t</sub> + ϵ<sub>t-1</sub> θ<sub>1</sub>+...+ ϵ<sub>t-q</sub> θ<sub>q</sub>**\
 **We will use ARMA(1,1).**
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  14078.28     18957.66   23145.57
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 14,078.28   | 18,957.66  | 23,145.57  |
 
 **\
 ACF function is not fully inside dashed lines, which is sign there are
@@ -385,9 +385,9 @@ particular dataset. It will try all possible combinations of ARIMA
 models by changing parameter values. We will start by first model,
 that was suggested, seasonal ARIMA.
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  13981.54     11087.77   15449.20
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 13,981.54   | 11,087.77  | 15,449.20  |
 
 **\
 ACF function is inside dashed lines, which is positive sign.**
@@ -405,9 +405,9 @@ difference). By default, it used one seasonal difference.\
 We will consider using a different seasonal unit root test (for
 example Canova and Hansen (CH) test statistic)
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  12806.54     15033.53   18463.70
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 12,806.54   | 15,033.53  | 18,463.70  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima2plot.png" weight="350" height="350">
 
@@ -417,9 +417,9 @@ Last model that i will be using came from idea to extend and explore
 model choosing capabilities with whole data, and then to use that
 newly found model on training data only.
 
-  **SD RES**   **MAE**    **RMSE**
-  ------------ ---------- ----------
-  10906.17     10111.22   15782.18
+| __SD RES__ | __MAE__ | __RMSE__ |
+|-------------|------------|------------|
+| 10,906.17   | 10,111.22  | 15,782.18  |
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima3adf.png">
 
