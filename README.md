@@ -127,11 +127,11 @@ naive forecast, random walk, drift method.**
 
 1.  **Mean model**
 
-A mean model takes the mean of previous observations and uses that for
-forecasting.
-**Formula**: **y~t~ = mean(y~t-x~)** x- observation of model for whole
-period
-**Model**: **meanf \<- meanf(ttrain, h=6)** h- period for prediction
+>A mean model takes the mean of previous observations and uses that for
+>forecasting.\
+>**Formula**: **y~t~ = mean(y~t-x~)** x- observation of model for whole
+>period\
+>**Model**: **meanf \<- meanf(ttrain, h=6)** h- period for prediction
 
   **SD RES**   **MAE**    **RMSE**
   ------------ ---------- ----------
@@ -215,7 +215,7 @@ other in the components of the time series that are modeled.
   ------------ ---------- ----------
   14205.04     15507.66   18561.26
 
-![](media/image11.png){width="3.725in" height="2.6259011373578303in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/SETS.png">
 
 2.  **Holt-Winters exponential smoothing -- HW**
 
@@ -236,10 +236,8 @@ other in the components of the time series that are modeled.
   ------------ --------- ----------
   14830.10     9482.57   15179.86
 
-**\
-**![](media/image12.png){width="3.7394346019247595in"
-height="2.6333333333333333in"}**\
-**
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/hw.png">
+
 
 3.  **Automated exponential smoothing**
 
@@ -260,10 +258,8 @@ height="2.6333333333333333in"}**\
   ------------ ---------- ----------
   0.1913       14908.23   17422.64
 
-**\
-**![](media/image13.png){width="3.8333333333333335in"
-height="2.7113812335958007in"}**\
-**
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/aets.png">
+
 
 9.  **ARIMA family models**
 
@@ -307,9 +303,8 @@ q that defines the size of moving average window
 **\
 **ACF function is inside dashed lines, which is positive sign.
 
-![](media/image14.png){width="3.125in" height="2.2in"}**\
-**![](media/image15.png){width="3.8219805336832895in"
-height="2.6166666666666667in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/maadf.png">\
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/maplot.png">
 
 2.  **Autoregressive model**
 
@@ -334,9 +329,8 @@ height="2.6166666666666667in"}
 **\
 **ACF function is inside dashed lines, which is positive sign.
 
-![](media/image16.png){width="3.1083333333333334in" height="2.175in"}**\
-**![](media/image17.png){width="3.8074540682414697in"
-height="2.6166666666666667in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/aradf.png">\
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arplot.png">
 
 3.  **Autoregressive--moving-average model - ARMA**
 
@@ -356,10 +350,9 @@ height="2.6166666666666667in"}
 **ACF function is not fully inside dashed lines, which is sign there are
 probably better models
 
-![](media/image18.png){width="3.125in" height="2.225in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/armaadf.png">
 
-![](media/image19.png){width="3.7583333333333333in"
-height="2.622211286089239in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/armaplot.png">
 
 4.  **Autoregressive integrated moving average- ARIMA**
 
@@ -399,10 +392,9 @@ height="2.622211286089239in"}
 **\
 **ACF function is inside dashed lines, which is positive sign.
 
-![](media/image20.png){width="3.1333333333333333in"
-height="2.191666666666667in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima1adf.png">
 
-![](media/image21.png){width="3.791298118985127in" height="2.675in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima1plot.png">
 
 2.  **ARIMA (0,1,3)**
 
@@ -417,8 +409,7 @@ height="2.191666666666667in"}
   ------------ ---------- ----------
   12806.54     15033.53   18463.70
 
-![](media/image22.png){width="3.2916666666666665in"
-height="2.301013779527559in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima2plot.png">
 
 3.  **ARIMA (0,1,1)(1,1,0)\[12\]**
 
@@ -430,16 +421,13 @@ height="2.301013779527559in"}
   ------------ ---------- ----------
   10906.17     10111.22   15782.18
 
-![](media/image23.png){width="2.691666666666667in"
-height="1.9516393263342082in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima3adf.png">
 
-![](media/image24.png){width="3.0166666666666666in"
-height="2.040805993000875in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima3plot.png">
 
 10. **Conclusion - choosing best fitting model for forecasting**
 
-![](media/image25.png){width="3.8916666666666666in"
-height="1.9166666666666667in"}
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/conclusion.png">
 
 First four benchmark models, are good to test certain things about time
 series, but are not used as final models. AR and MA models are good when
