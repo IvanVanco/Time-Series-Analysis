@@ -31,6 +31,11 @@ connection <- odbcDriverConnect(connection = "Driver={SQL Server Native Client 1
 
 data <- sqlFetch(connection, "dbo.Test_ProdajaPoMesecima", colnames = FALSE, rownames = TRUE)
 
+######Only for MAC users######
+path <- "C:\\Users\\Ivan\\Desktop\\Primena vestacke intelegencije\\Primena vremenskih serija\\data.csv"
+
+data <- read.csv(path, stringsAsFactors = FALSE, header = TRUE)
+
 ###########################################################################################################
 #######################################2. DATA Transformation phase########################################
 ###########################################################################################################
@@ -309,38 +314,13 @@ as.vector(ttest - abs(fcvektorarima2))
 autoplot(tdata)+
   autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)
 
-###########################################
-#6.4.3 ARIMA(0,1,1)(1,1,0)[12]#############
-###########################################
-arima3 <- auto.arima(tdata, d=1, D=1, 
-                    stepwise = FALSE,
-                    approximation = FALSE,
-                    trace = TRUE)
-
-arima3 <- arima(ttrain, order = c(0L, 1L, 1L),
-               seasonal = list(order = c(1L, 1L, 0L), period = 12))
-
-checkresiduals(arima3)
-
-yarima3 <- predict(arima3, 6)
-
-fcvektorarima3 <- c(yarima3$pred[1],yarima3$pred[2],yarima3$pred[3],yarima3$pred[4],yarima3$pred[5],yarima3$pred[6])
-
-arima3summary <- c(sqrt(arima3$sigma2), mean(abs(ttest-fcvektorarima3)), sqrt(mean((ttest-fcvektorarima3)^2)))
-arima3summary
-
-as.vector(ttest - abs(fcvektorarima3))
-
-autoplot(tdata)+
-  autolayer(ts(fcvektorarima3, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,1)(1,1,0)[12]", PI = FALSE)
-
 #####################################################
 #7. Choosing best fitting model for forecasting######
 #####################################################
 sumarno<- data.frame(rbind(meanfsummary, rwfsummary, rwdsummary, snaivesummary, setssummary, hwsummary, 
-                          aetssummary, arsummary, masummary, armasummary, arima1summary, arima2summary, arima3summary),
+                          aetssummary, arsummary, masummary, armasummary, arima1summary, arima2summary),
            row.names = c("Mean", "Random walk-Naive", "Drift","S Naive", "Simple ETS", "HW", "Automated ETS", "AR(1)",
-                         "MA(1)", "ARMA(1,1)", "ARIMA(1,0,0)(0,1,0)[12]", "ARIMA(0,1,3)", "ARIMA(0,1,1)(1,1,0)[12]"))
+                         "MA(1)", "ARMA(1,1)", "ARIMA(1,0,0)(0,1,0)[12]", "ARIMA(0,1,3)"))
 colnames(sumarno) <- c("SD Residuals", "MAE", "RMSE")
 sumarno
 
@@ -356,8 +336,7 @@ autoplot(tdata)+
   autolayer(ts(fcvektorar, start = c(2019,10),frequency = 12), series = "AR(1)", PI = FALSE)+
   autolayer(ts(fcvektorarma, start = c(2019,10),frequency = 12), series = "ARMA(1,1)", PI = FALSE)+
   autolayer(ts(fcvektorarima1, start = c(2019,10),frequency = 12), series = "ARIMA(1,0,0)(0,1,0)[12]", PI = FALSE)+
-  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)+
-  autolayer(ts(fcvektorarima3, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,1)(1,1,0)[12]", PI = FALSE)
+  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)
 
 ############################################Appendix#######################################################
 
