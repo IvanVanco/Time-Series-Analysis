@@ -56,8 +56,7 @@ popular and basic database connection driver.\
 We will use SQL Server to import data from view object named
 **TEST\_ProdajaPoMesecima**.\
 Firstly, we create connection object by giving them connection string,
-contained of **driver's name**, **server's name**, **database**, **uid**
-- username and **pwd** - password.\
+contained of **driver's name**, **server's name**, **database**, **uid**- username and **pwd** - password.\
 Then, we call stored view from server, and get raw data inside data
 variable.
 
