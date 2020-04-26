@@ -34,9 +34,9 @@ Those time series components can be divided into
 The general magnitude of the time series is also referred to with
 "level".
 
-**In our example, we will be focusing on sales dataset for 3 years and 3
-months by month interval, and we use one dimensional time series
-analysis techniques and compare them.**
+**In our example, we will be looking wholesale confectionery products data. Our main focus is net revenue sales dataset from year 2017, until end of first quarter of 2020 (3 years and 3 months) by month interval.
+We use one dimensional time series analysis techniques and machine learning algorithms, and compare them.
+**
 
 ## 2.  **Loading libraries**
 
@@ -62,6 +62,8 @@ Then, we call stored view from server, and get raw data inside data
 variable.
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/connection.png">
+
+**Also, for MAC users**, I provided **data.csv** file. Set file path location to the file data.csv inside **path** variable (keep same structure using \\ marks).
 
 Structured data is needed before procced into next step. For that we
 will remove last month's incomplete data, present sales in thousands
@@ -97,9 +99,9 @@ data partition, we need to recreate time series copy.
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/datapartition.png">
 
 
-## 6.  **Define model indicators**
+## 6.  **Model evaluation**
 
-We will use tree indicators:
+Some of the most popular evaluation metrics are:
 
 1.  **Residual Standard Deviation** of training data **(SD res, or
     √sigma<sup>2</sup>)** -- lower values are good sign, but not enough
@@ -107,14 +109,17 @@ We will use tree indicators:
 2.  **Mean Absolute Error (MAE)** of test data -- absolute prediction
     error, lower is better.
 
-3.  **Root Mean Square Deviation (RMSE)** of test data-- prediction
+3.  **Root Mean Squared Error (RMSE)** of test data-- prediction
     square deviation error, lower is better.
 
-4.  **Graphical presentation of predicted vs real value**
-
-5.  **For ARIMA models, ADF function is also good**
-
 Indicator number 2. and 3. are crucial for model grading.
+
+Also, for visualization, we will be using these evaluation charts:
+
+1.	**Graphical presentation of predicted vs real value** 
+
+2.	**For ARIMA models, Correlogram, also known as ACF plot - ACF** is an auto-correlation function which gives us values of auto-correlation of any series with its lagged values. In simple terms, it describes how well the present value of the series is related with its past values.
+
 
 ## 7.  **Modelling -- simple techniques**
 
@@ -144,7 +149,7 @@ period\
 
 A random walk, on the other hand, would predict the next value, Ŷ(t),
 that equals to the previous value plus a constant change.\
-**Formula**: **y<sub>t</sub> = mean(y<sub>t-1</sub>) + C** C- constant\
+**Formula**: **y<sub>t</sub> = mean(y<sub>t-1</sub>)** \
 **Model**: **rwf \<- rwf(ttrain, h=6)** or **naive(ttrain, h=6)** h-
 period for prediction
 
@@ -251,8 +256,11 @@ the second letter denotes the trend type (N, A, M or Z),\
 and the third letter denotes the seasonality type (N, A, M or Z).\
 The letters stand for N = none, A = additive, M = multiplicative and Z
 = automatically selected.\
-**Model**: **hw \<- aets \<- ets(ttrain) - It is suggesting ETS
-(M,N,N)**
+**Model**: **aets \<- ets(ttrain)**\
+**Note(thank’s to my professor)*** In this particular example, if we use aets function, it will be suggesting us **ETS (M,N,N)**, which is obviously not ideal model, considering the observed trend in data. In this case we must add model parameter in ets function like this (**ttrain, model = ("AAA")**)\
+
+I will use these default values, only because my previous HW model is practically same as **ETS (A,A,A)**, but be concerned if you are using only this function.
+
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
@@ -293,15 +301,14 @@ have a more complicated stochastic structure.\
 where **μ** is the mean of the series, the ***θ*<sub>1</sub>,
 \..., *θ<sub>q</sub>*** are the parameters of the model and
 the ***ε<sub>t</sub>*, *ε<sub>t−1</sub>,\..., *ε<sub>t-q</sub>** are white noise error
-terms. The value of ***q*** is called the order of the MA model. **We
-will use MA(1).**
+terms. The value of ***q*** is called the order of the MA model. **I will demonstrate use of simplest MA (1) model, and later I will add more complexity.**
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
 | 12,806.54   | 20,977.35  | 26,129.44  |
 
 **\
-ACF function is inside dashed lines, which is positive sign.**
+ACF function is inside dashed lines, there are no statistically significant autocorrelation, which is   positive sign**
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/maadf.png">\
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/maplot.png" weight="350" height="350">
@@ -309,7 +316,7 @@ ACF function is inside dashed lines, which is positive sign.**
 ### 9.2  **Autoregressive model**
 
 The autoregressive model specifies that the output variable depends
-linearly on its own previous values and on a stochastic. Together with
+linearly on its own previous values and on a stochastic element. Together with
 the moving-average (MA) model, it is a special case and key component
 of the more general autoregressive--moving-average (ARMA) and
 autoregressive integrated moving average (ARIMA(p,0,0)) models of time
@@ -320,7 +327,7 @@ variable.\
 **Model**: **AR(p): Y<sub>t</sub> = β<sub>0</sub>+β<sub>1</sub>y<sub>t-1</sub> +...+ β<sub>p</sub>y<sub>t-p</sub> +ϵ<sub>t</sub>** -
 where **β<sub>0</sub>** is constant, the **β<sub>1</sub>**, \..., **β<sub>p</sub>**  are the
 parameters of the model and the ***ε<sub>t</sub>*** is white noise. The value
-of ***p*** is called the order of the AR model. **We will use AR(1).**
+of ***p*** is called the order of the AR model. **I will demonstrate use of simplest AR (1) model, and later I will add more complexity.**
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
@@ -340,7 +347,9 @@ involves modeling the error term as a linear combination of error
 terms occurring contemporaneously and at various times in the past.\
 **Model**: **ARMA(p, q): Y<sub>t</sub> = µ +β<sub>0</sub> +β<sub>1</sub>y<sub>t-1</sub> +...+ β<sub>p</sub>y<sub>t-p</sub>
 +ϵ<sub>t</sub> + ϵ<sub>t-1</sub> θ<sub>1</sub>+...+ ϵ<sub>t-q</sub> θ<sub>q</sub>**\
-**We will use ARMA(1,1).**
+**I will demonstrate use of simplest ARMA (1,1) model, which is composition of AR (1) and MA (1), to build, usually better, hybrid model. This is not final model. 
+I will add more model complexity and also providing reasons for choosing particular parameters values.
+**
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
@@ -411,19 +420,6 @@ example Canova and Hansen (CH) test statistic)
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima2plot.png" weight="350" height="350">
 
-   #### 9.4.3.  **ARIMA (0,1,1)(1,1,0)[12]**
-
-Last model that i will be using came from idea to extend and explore
-model choosing capabilities with whole data, and then to use that
-newly found model on training data only.
-
-| __SD RES__ | __MAE__ | __RMSE__ |
-|-------------|------------|------------|
-| 10,906.17   | 10,111.22  | 15,782.18  |
-
-<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima3adf.png">
-
-<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima3plot.png" weight="350" height="350">
 
 ## 10. **Conclusion - choosing best fitting model for forecasting**
 
@@ -439,7 +435,13 @@ ARIMA model):
 1.  **Short time frame** -- 39 observation only in total;
 
 2.  **Existence of structural fracture movements** - (cause is Corona
-    virus).
+    virus). Structural fracture is a series of observations that is inconsistent with the previous time series. 
+Corona virus has influenced on bringing several government decisions (interventions), that begun from middle of March 2020., such as:
+
+    a.	**Some import products could not be imported into our country;**
+
+    b.	**Sales value got decreased because sales field people work from home, and, thus, their efficiency decline down**
+
 
 In more general occasions, ARIMA models are preferred. They are superior
 models, and are widely used in practice.\
