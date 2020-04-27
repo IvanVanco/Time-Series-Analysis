@@ -443,7 +443,7 @@ In this project I will use KNN regression.\
 |------------|------------|
 | 16,924.29  | 19,443.02  |
 
-<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/knnplot.png" weight="350" height="350">
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/knnplot.PNG" weight="350" height="350">
 
 ### 10.2  **Neural networks - Multilayer Perceptron’s (MLP)**
 
@@ -463,9 +463,9 @@ I chose **nnfor** package, because it differs from existing neural network imple
 |------------|------------|
 | ~12,626.29  | ~16,259.02  |
 
-<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpneuralplot.png" weight="350" height="350">
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpneuralplot.PNG" weight="350" height="350">
 
-<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpplot.png" weight="350" height="350">
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpplot.PNG" weight="350" height="350">
 
 ## 11. **Conclusion - choosing best fitting model for forecasting**
 
