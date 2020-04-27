@@ -22,6 +22,10 @@ library(fpp2)
 library(uroot)
 #install.packages("RODBC")
 library(RODBC)
+#install.packages("tsfknn")
+library(tsfknn)
+#install.packages("nnfor")
+library(nnfor)
 
 ###########################################################################################################
 ##################1. Import data from MS SQL Server to data frame using ODBC connection - RODBC############
@@ -314,13 +318,52 @@ as.vector(ttest - abs(fcvektorarima2))
 autoplot(tdata)+
   autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)
 
+
+##########################################################################################################
+######################################7. Machine learning models##########################################
+##########################################################################################################
+
+#########################
+#7.1 KNN model###########
+#########################
+knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))  
+summary(knn)
+
+fcvektorknn <- c(knn$prediction[1],knn$prediction[2],knn$prediction[3],knn$prediction[4],knn$prediction[5],knn$prediction[6])
+
+knnsummary <- c(0,mean(abs(ttest-fcvektorknn)), sqrt(mean((ttest-fcvektorknn)^2)))
+knnsummary
+
+as.vector(ttest - abs(fcvektorknn))
+
+autoplot(tdata)+
+  autolayer(ts(fcvektorknn, start = c(2019,10),frequency = 12), series = "KNN k=9", PI = FALSE)
+
+#####################################
+#7.2 Neural Networks models##########
+#####################################
+mlp <- mlp(ttrain, lags=1:12, sel.lag=FALSE, reps = 10000)
+
+plot(mlp)
+
+ymlp <- forecast(mlp, h=6)
+fcvektormlp <- c(ymlp$mean[1],ymlp$mean[2],ymlp$mean[3],ymlp$mean[4],ymlp$mean[5],ymlp$mean[6])
+
+mlpsummary <- c(0,round(mean(abs(ttest-fcvektormlp)),2), round(sqrt(mean((ttest-fcvektormlp)^2)),2))
+mlpsummary
+
+as.vector(ttest - abs(fcvektormlp))
+
+autoplot(tdata)+
+  autolayer(ts(fcvektormlp, start = c(2019,10),frequency = 12), series = "Neural network-MLP", PI = FALSE)
+
 #####################################################
 #7. Choosing best fitting model for forecasting######
 #####################################################
 sumarno<- data.frame(rbind(meanfsummary, rwfsummary, rwdsummary, snaivesummary, setssummary, hwsummary, 
-                          aetssummary, arsummary, masummary, armasummary, arima1summary, arima2summary),
-           row.names = c("Mean", "Random walk-Naive", "Drift","S Naive", "Simple ETS", "HW", "Automated ETS", "AR(1)",
-                         "MA(1)", "ARMA(1,1)", "ARIMA(1,0,0)(0,1,0)[12]", "ARIMA(0,1,3)"))
+                           aetssummary, arsummary, masummary, armasummary, arima1summary, arima2summary, knnsummary, mlpsummary),
+                     row.names = c("Mean", "Random walk-Naive", "Drift","S Naive", "Simple ETS", "HW", "Automated ETS", "AR(1)",
+                                   "MA(1)", "ARMA(1,1)", "ARIMA(1,0,0)(0,1,0)[12]", "ARIMA(0,1,3)","KNN k=9", "Neural networks-MLP"))
 colnames(sumarno) <- c("SD Residuals", "MAE", "RMSE")
 sumarno
 
@@ -336,7 +379,11 @@ autoplot(tdata)+
   autolayer(ts(fcvektorar, start = c(2019,10),frequency = 12), series = "AR(1)", PI = FALSE)+
   autolayer(ts(fcvektorarma, start = c(2019,10),frequency = 12), series = "ARMA(1,1)", PI = FALSE)+
   autolayer(ts(fcvektorarima1, start = c(2019,10),frequency = 12), series = "ARIMA(1,0,0)(0,1,0)[12]", PI = FALSE)+
-  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)
+  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE) + 
+  autolayer(ts(fcvektorknn, start = c(2019,10),frequency = 12), series = "KNN k=9", PI = FALSE) + 
+  autolayer(ts(fcvektormlp, start = c(2019,10),frequency = 12), series = "Neural network-MLP", PI = FALSE)
+
+
 
 ############################################Appendix#######################################################
 
