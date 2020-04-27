@@ -46,7 +46,9 @@ all possible changes are made easier. **\
 **In **fpp2** are all auto model and plotting functions.\
 **RODBC** is used to create connection using ODBC driver, the most
 popular and basic database connection driver.\
-**Uroot** is used for later in chapter for changing model parameters .
+**Uroot** is used for later in chapter for changing model parameters.\
+**Tsfknn** is package for using knn algorithm on time series data.\
+**Nnfor** is neural network package for time series data.
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/loadinglibrary.png">
 
@@ -420,7 +422,52 @@ example Canova and Hansen (CH) test statistic)
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/arima2plot.png" weight="350" height="350">
 
 
-## 10. **Conclusion - choosing best fitting model for forecasting**
+## 10.  **Machine learning models**
+
+In this last few chapters i presented few most commonly used statistical models for forecasting univariate time series data. There are also machine learning models. 
+This problem topic is relatively new for machine learning algorithms, but recently they are gaining in popularity in almost every field aspect, and they are very good competitors to our traditional models. 
+I will demonstrate two types of models.
+
+### 10.1  **KNN model**
+
+KNN is a very popular algorithm used in classification and regression. Given a new example, KNN finds its k most similar examples, called nearest neighbors, according to a distance metric such as the Euclidean distance, and predicts its value as an aggregation of the target values associated with its nearest neighbors. 
+In this project I will use KNN regression.\
+
+**Model: knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))** where:\
+**h** - prediction horizon;\
+**lags** - determine the lagged values used as features or autoregressive explanatory variables. A good choice for the lags used as features would be 1:12, when we are working with monthly data. Also, after testing with different time frames, 12 was the best fit;\
+**k** - the number of nearest neighbors used in the prediction. Unfortunately, cross validation tests are not implemented yet in time series analysis. Using manual tests, optimal result is for k=9, by testing first 12 values;\
+**cf** - combination function used to aggregate the targets-default is mean.
+
+| __MAE__ | __RMSE__ |
+|------------|------------|
+| 16,924.29  | 19,443.02  |
+
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/knnplot.png" weight="350" height="350">
+
+### 10.2  **Neural networks - Multilayer Perceptron’s (MLP)**
+
+I chose **nnfor** package, because it differs from existing neural network implementations for R, in that it provides code to automatically design networks with reasonable forecasting performance, and also provide in-depth control to the experienced user. This increases the robustness of the resulting networks, but also helps reduce the training time.\
+**Note that nnfor package relay on neuralnet library, and since neuralnet cannot tap on GPU processing, large networks tend to be very slow to train.**
+
+**Model: mlp <- mlp(ttrain, lags=1:12, sel.lag=FALSE, reps = 10000)** where:\
+**lags** –allows you to select the autoregressive lags considered by the network. If this is not provided then the network uses lag 1 to lag m, the seasonal period of the series. You can force that using the argument keep, or turn off the automatic input selection altogether using the argument **sel.lag**=FALSE;\
+**reps** - defines how many training repetitions are used. The default reps=20 is a compromise between training speed and performance, but the more repetitions you can afford the better. They help not only in the performance of the model, but also in the stability of the results, when the network is retrained. **I found using 10000 samples are quite good estimator, but have patience in mind**;\
+**comb** - How the different training repetitions are combined is controlled by the argument comb that accepts the options median, mean, and mode. **Default is median, and that is in my model**;\
+**hd** - defines a fixed number of hidden nodes. If it is a single number, then the neurons are arranged in a single hidden node. If it is a vector, then these are arranged in multiple layers. **By default, it will chose optimal number, which in my case is 13 in one layer(For univariate time series, multiple layers are rarely used)**;\
+**difforder** - it is useful to remove the trend from a time series prior to modelling it. This is handled by the argument difforder. If difforder=0 no differencing is performed. For diff=1, level differences are performed. Similarly, if difforder=12 then 12th order differences are performed. If the time series is seasonal with seasonal period 12, this would then be seasonal differences. You can do both with difforder=c(1,12) or any other set of difference orders. **In my case, difforder=NULL then the code decides automatically – chose D1 – first difference**.\
+
+**In testing and modifying parameters of function, this model got me best results.**
+
+| __MAE__ | __RMSE__ |
+|------------|------------|
+| ~12,626.29  | ~16,259.02  |
+
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpneuralplot.png" weight="350" height="350">
+
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/mlpplot.png" weight="350" height="350">
+
+## 11. **Conclusion - choosing best fitting model for forecasting**
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/conclusion.png">
 
@@ -428,8 +475,7 @@ First four benchmark models, are good to test certain things about time
 series, but are not used as final models. AR and MA models are good when
 there are non-seasonal effects.
 
-HW is clear winner here, and there are two main reasons(mainly against
-ARIMA model):
+HW is clear winner here, and there are two main reasons(mainly against ARIMA and ML models):
 
 1.  **Short time frame** -- 39 observation only in total;
 
