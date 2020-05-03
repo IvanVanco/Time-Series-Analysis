@@ -82,7 +82,12 @@ Our time series looks like this:
 From graph, we can fill there is good positive trend. There are also
 variations in our values, but in this analysis, we will not focus on
 them.\
-To inspect seasonality we will **ggseasonplot** function.
+To inspect seasonality we need to remove trend from series. 
+There are two most popular ways:
+1.	For additive trend - Finding first difference and 
+2.	For multiplicative trend - Dividing time series with trend function. We will use this one.
+
+Then we can use **ggseasonplot** function on transformed series.
 
 <img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/exploreseason.png" weight="350" height="350">
 
@@ -129,7 +134,7 @@ general understanding of historical data and to build intuition upon
 which to add additional layers complexity and are good to test basic
 nature about time series.\
 Several such techniques are common in literature such as: **mean model,
-naive forecast, random walk, drift method.**
+naive forecast - random walk, drift method and seasonal naive.**
 
 ### 7.1  **Mean model**
 
@@ -149,7 +154,7 @@ period\
 ### 7.2  **Naive method -- Random walk**
 
 A random walk, on the other hand, would predict the next value, Ŷ(t),
-that equals to the previous value plus a constant change.\
+that equals the average of previous values.\
 **Formula**: **y<sub>t</sub> = mean(y<sub>t-1</sub>)** \
 **Model**: **rwf \<- rwf(ttrain, h=6)** or **naive(ttrain, h=6)** h-
 period for prediction
@@ -215,7 +220,7 @@ balanced.\
 **Formula**: **F<sub>t</sub> = αy<sub>t-1</sub> + (1-α)F<sub>t-1</sub>** where\
 F<sub>t</sub> , F<sub>t-1</sub> - forecast values for time t, t-1; y<sub>t-1</sub> actual value
 for time t-1; α - smoothing constant\
-**Model**: **sets \<- ses(ttrain, h=6)** h- period for prediction
+**Model**: **sets \<- ses(ttrain, h=6)** h- period for prediction, α- here is estimated by model itself to be best fitted one
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
@@ -236,7 +241,9 @@ observations:\
 β (beta) for the trend component,\
 γ (gamma) for the seasonality component.\
 **Model**: **hw \<- hw(ttrain, h = 6, seasonal = "additive")** h-
-period for prediction
+period for prediction\
+
+***Note* - Our Holt Winter model demonstrate better result in using additive seasonality instead of multiplicative, even though seasonality visually seems to be multiplicative. This characteristic is well known for short time series, so we will be cautious in using this model – thanks professor Jelena Jovanovic for this excellent observation.**
 
 | __SD RES__ | __MAE__ | __RMSE__ |
 |-------------|------------|------------|
@@ -424,7 +431,7 @@ example Canova and Hansen (CH) test statistic)
 
 ## 10.  **Machine learning models**
 
-In this last few chapters i presented few most commonly used statistical models for forecasting univariate time series data. There are also machine learning models. 
+In this last few sections i presented few most commonly used statistical models for forecasting univariate time series data. There are also machine learning models. 
 This problem topic is relatively new for machine learning algorithms, but recently they are gaining in popularity in almost every field aspect, and they are very good competitors to our traditional models. 
 I will demonstrate two types of models.
 
@@ -436,8 +443,12 @@ In this project I will use KNN regression.\
 **Model: knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))** where:\
 **h** - prediction horizon;\
 **lags** - determine the lagged values used as features or autoregressive explanatory variables. A good choice for the lags used as features would be 1:12, when we are working with monthly data. Also, after testing with different time frames, 12 was the best fit;\
-**k** - the number of nearest neighbors used in the prediction. Unfortunately, cross validation tests are not implemented yet in time series analysis. Using manual tests, optimal result is for k=9, by testing first 12 values;\
+**k** - the number of nearest neighbors used in the prediction. Unfortunately, cross validation tests are not implemented yet in time series analysis;\
 **cf** - combination function used to aggregate the targets-default is mean.
+
+Using manual comparing tests, optimal result is for k=9.
+
+<img src="https://github.com/IvanVanco/Time-Series-Analysis/blob/master/res/knncomparings.PNG" weight="350" height="350">
 
 | __MAE__ | __RMSE__ |
 |------------|------------|
@@ -448,13 +459,13 @@ In this project I will use KNN regression.\
 ### 10.2  **Neural networks - Multilayer Perceptron’s (MLP)**
 
 I chose **nnfor** package, because it differs from existing neural network implementations for R, in that it provides code to automatically design networks with reasonable forecasting performance, and also provide in-depth control to the experienced user. This increases the robustness of the resulting networks, but also helps reduce the training time.\
-**Note that nnfor package relay on neuralnet library, and since neuralnet cannot tap on GPU processing, large networks tend to be very slow to train.**
+**Note that nnfor package relay on neuralnet library, and since neuralnet cannot tap on GPU processing, large networks tend to be very slow to train. Our data is not long, so we can create and train more networks.**
 
-**Model: mlp <- mlp(ttrain, lags=1:12, sel.lag=FALSE, reps = 10000)** where:\
-**lags** –allows you to select the autoregressive lags considered by the network. If this is not provided then the network uses lag 1 to lag m, the seasonal period of the series. You can force that using the argument keep, or turn off the automatic input selection altogether using the argument **sel.lag**=FALSE;\
+**Model: mlp <- mlp(ttrain, lags=1:12, reps = 10000)** where:\
+**lags** –allows you to select the autoregressive lags considered by the network. If this is not provided then the network uses 1 : frequency(series);\
 **reps** - defines how many training repetitions are used. The default reps=20 is a compromise between training speed and performance, but the more repetitions you can afford the better. They help not only in the performance of the model, but also in the stability of the results, when the network is retrained. **I found using 10000 samples are quite good estimator, but have patience in mind**;\
 **comb** - How the different training repetitions are combined is controlled by the argument comb that accepts the options median, mean, and mode. **Default is median, and that is in my model**;\
-**hd** - defines a fixed number of hidden nodes. If it is a single number, then the neurons are arranged in a single hidden node. If it is a vector, then these are arranged in multiple layers. **By default, it will chose optimal number, which in my case is 13 in one layer(For univariate time series, multiple layers are rarely used)**;\
+**hd** - defines a fixed number of hidden nodes. If it is a single number, then the neurons are arranged in a single hidden layer. If it is a vector, then these are arranged in multiple layers. **By default, it will chose optimal number, which in my case is 13 in one layer(For univariate time series, multiple layers are rarely used)**;\
 **difforder** - it is useful to remove the trend from a time series prior to modelling it. This is handled by the argument difforder. If difforder=0 no differencing is performed. For diff=1, level differences are performed. Similarly, if difforder=12 then 12th order differences are performed. If the time series is seasonal with seasonal period 12, this would then be seasonal differences. You can do both with difforder=c(1,12) or any other set of difference orders. **In my case, difforder=NULL then the code decides automatically – chose D1 – first difference**.\
 
 **In testing and modifying parameters of function, this model got me best results.**
