@@ -36,8 +36,7 @@ connection <- odbcDriverConnect(connection = "Driver={SQL Server Native Client 1
 data <- sqlFetch(connection, "dbo.Test_ProdajaPoMesecima", colnames = FALSE, rownames = TRUE)
 
 ######Only for MAC users######
-path <- "C:\\Users\\Ivan\\Desktop\\Primena vestacke intelegencije\\Primena vremenskih serija\\data.csv"
-
+path <- "data.csv"
 data <- read.csv(path, stringsAsFactors = FALSE, header = TRUE)
 
 ###########################################################################################################
@@ -64,6 +63,7 @@ autoplot(tdata) +
 ####Trend#######
 
 #Data has a trend
+plot(tdata)
 abline(reg = lm(tdata~time(tdata)))
 
 ####Season#######
@@ -80,11 +80,8 @@ ggseasonplot(tdata/trend)+
 ###########################################################################################################
 #########################################4. Splitting data#################################################
 ###########################################################################################################
-train <- data[1:33,]
-test <- data[34:39,]
-
-ttrain <- ts(train[,3], start = c(2017, 1), end = c(2019, 9), frequency = 12)
-ttest <- ts(test[,3], start = c(2019, 10), end = c(2020, 3), frequency = 12)
+ttest <- tail(tdata, 6)
+ttrain <- head(tdata, 33)
 
 ##########################################################################################################
 ##########################################5. Simple benchmark models######################################
@@ -99,10 +96,14 @@ meanf <- meanf(ttrain, h=6)
 fcvektormeanf <- c(rep(meanf$mean[1], times = 6))
 
 #Sd residuals, Test Apsolute mean error, Test Root Mean Square Error
-meanfsummary <- c(sd(meanf$residuals, na.rm = TRUE), mean(abs(ttest-fcvektormeanf)), sqrt(mean((ttest-fcvektormeanf)^2)))
+meanfsummary <- c(res_sd = sd(meanf$residuals, na.rm = TRUE), 
+                  MAE = mean(abs(ttest-fcvektormeanf)), 
+                  RMSE = sqrt(mean((ttest-fcvektormeanf)^2)))
 meanfsummary
 
-#Real differences in values
+#Real differences in values between test and trained data. 
+#We can used them to investigate if our model estimated values below tested, 
+#or it exceeded it in some months(Can be used as subjective criterion i nsome cases) 
 as.vector(ttest - abs(fcvektormeanf))
 
 autoplot(tdata)+
@@ -115,7 +116,9 @@ rwf <- rwf(ttrain, h=6) #or naive(ttrain, h=6)
 
 fcvektorrw <- c(rep(rwf$mean[1], times = 6))
 
-rwfsummary <- c(sd(rwf$residuals, na.rm = TRUE), mean(abs(ttest-fcvektorrw)), sqrt(mean((ttest-fcvektorrw)^2)))
+rwfsummary <- c(res_sd = sd(rwf$residuals, na.rm = TRUE), 
+                MAE = mean(abs(ttest-fcvektorrw)), 
+                RMSE = sqrt(mean((ttest-fcvektorrw)^2)))
 rwfsummary
 
 as.vector(ttest - abs(fcvektorrw))
@@ -128,9 +131,11 @@ autoplot(tdata)+
 ##############################################################
 rwd <- rwf(ttrain, h=6, drift=TRUE)
 
-fcvektorrwd <- c(rwd$mean[1],rwd$mean[2],rwd$mean[3],rwd$mean[4],rwd$mean[5],rwd$mean[6])
+fcvektorrwd <- as.numeric(rwd$mean)
 
-rwdsummary <- c(sd(rwd$residuals, na.rm = TRUE), mean(abs(ttest-fcvektorrwd)), sqrt(mean((ttest-fcvektorrwd)^2)))
+rwdsummary <- c(res_sd = sd(rwd$residuals, na.rm = TRUE), 
+                MAE = mean(abs(ttest-fcvektorrwd)), 
+                RMSE = sqrt(mean((ttest-fcvektorrwd)^2)))
 rwdsummary
 
 as.vector(ttest - abs(fcvektorrwd))
@@ -143,9 +148,11 @@ autoplot(tdata)+
 #################################################
 snaive <- snaive(ttrain, h=6)
 
-fcvektorsn <- c(snaive$mean[1],snaive$mean[2],snaive$mean[3],snaive$mean[4],snaive$mean[5],snaive$mean[6])
+fcvektorsn <- as.numeric(snaive$mean)
 
-snaivesummary <- c(sd(snaive$residuals, na.rm = TRUE), mean(abs(ttest-fcvektorsn)), sqrt(mean((ttest-fcvektorsn)^2)))
+snaivesummary <- c(res_sd = sd(snaive$residuals, na.rm = TRUE), 
+                   MAE = mean(abs(ttest-fcvektorsn)), 
+                   RSE = sqrt(mean((ttest-fcvektorsn)^2)))
 snaivesummary
 
 as.vector(ttest - abs(fcvektorsn))
@@ -164,7 +171,9 @@ sets <- ses(ttrain, h=6)
 
 fcvektorsets <- c(sets$mean)
 
-setssummary <- c(sd(sets$residuals, na.rm = TRUE), mean(abs(ttest-fcvektorsets)), sqrt(mean((ttest-fcvektorsets)^2)))
+setssummary <- c(res_sd = sd(sets$residuals, na.rm = TRUE), 
+                 MAE = mean(abs(ttest-fcvektorsets)), 
+                 RSE = sqrt(mean((ttest-fcvektorsets)^2)))
 setssummary
 
 as.vector(ttest - abs(fcvektorsets))
@@ -177,9 +186,11 @@ autoplot(tdata)+
 #############################
 hw <- hw(ttrain, h = 6) #same as seasonal = "additive"
 
-fcvektorhw <- c(hw$mean[1],hw$mean[2],hw$mean[3],hw$mean[4],hw$mean[5],hw$mean[6])
+fcvektorhw <- as.numeric(hw$mean)
 
-hwsummary <- c(sd(hw$residuals, na.rm = TRUE), mean(abs(ttest-fcvektorhw)), sqrt(mean((ttest-fcvektorhw)^2)))
+hwsummary <- c(res_sd = sd(hw$residuals, na.rm = TRUE), 
+               MAE = mean(abs(ttest-fcvektorhw)), 
+               RSE = sqrt(mean((ttest-fcvektorhw)^2)))
 hwsummary
 
 as.vector(ttest - abs(fcvektorhw))
@@ -194,9 +205,11 @@ aets <- ets(ttrain)
 aets <- predict(aets, h=6)
 #it is suggesting ETS(M,N,N), which is not as good as HW
 
-fcvektoraets <- c(aets$mean[1],aets$mean[2],aets$mean[3],aets$mean[4],aets$mean[5],aets$mean[6])
+fcvektoraets <- as.numeric(aets$mean)
 
-aetssummary <- round(c(sd(aets$residuals, na.rm = TRUE), mean(abs(ttest-fcvektoraets)), sqrt(mean((ttest-fcvektoraets)^2))),4)
+aetssummary <- round(c(res_sd = sd(aets$residuals, na.rm = TRUE), 
+                       MAE = mean(abs(ttest-fcvektoraets)), 
+                       RSE = sqrt(mean((ttest-fcvektoraets)^2))),4)
 aetssummary
 
 as.vector(ttest - abs(fcvektoraets))
@@ -217,9 +230,11 @@ checkresiduals(ma)
 
 yma <- predict(ma, 6)
 
-fcvektorma <- c(yma$pred[1],yma$pred[2],yma$pred[3],yma$pred[4],yma$pred[5],yma$pred[6])
+fcvektorma <- as.numeric(yma$pred)
 
-masummary <- c(sqrt(arima2$sigma2), mean(abs(ttest-fcvektorma)), sqrt(mean((ttest-fcvektorma)^2)))
+masummary <- c(res_sd = sqrt(ma$sigma2), 
+               MAE = mean(abs(ttest-fcvektorma)), 
+               RSE = sqrt(mean((ttest-fcvektorma)^2)))
 masummary
 
 as.vector(ttest - abs(fcvektorma))
@@ -236,9 +251,11 @@ checkresiduals(ar)
 
 yar <- predict(ar, 6)
 
-fcvektorar <- c(yar$pred[1],yar$pred[2],yar$pred[3],yar$pred[4],yar$pred[5],yar$pred[6])
+fcvektorar <- as.numeric(yar$pred)
 
-arsummary <- c(sqrt(ar$sigma2), mean(abs(ttest-fcvektorar)), sqrt(mean((ttest-fcvektorar)^2)))
+arsummary <- c(res_sd = sqrt(ar$sigma2), 
+               MAE = mean(abs(ttest-fcvektorar)), 
+               RSE = sqrt(mean((ttest-fcvektorar)^2)))
 arsummary
 
 as.vector(ttest - abs(fcvektorar))
@@ -255,9 +272,11 @@ checkresiduals(arma)
 
 yarma <- predict(arma, 6)
 
-fcvektorarma <- c(yarma$pred[1],yarma$pred[2],yarma$pred[3],yarma$pred[4],yarma$pred[5],yarma$pred[6])
+fcvektorarma <- as.numeric(yarma$pred)
 
-armasummary <- c(sqrt(arma$sigma2), mean(abs(ttest-fcvektorarma)), sqrt(mean((ttest-fcvektorarma)^2)))
+armasummary <- c(res_sd = sqrt(arma$sigma2), 
+                 MAE = mean(abs(ttest-fcvektorarma)), 
+                 RSE = sqrt(mean((ttest-fcvektorarma)^2)))
 armasummary
 
 as.vector(ttest - abs(fcvektorarma))
@@ -284,9 +303,11 @@ checkresiduals(arima1)
 
 yarima1 <- predict(arima1, 6)
 
-fcvektorarima1 <- c(yarima1$pred[1],yarima1$pred[2],yarima1$pred[3],yarima1$pred[4],yarima1$pred[5],yarima1$pred[6])
+fcvektorarima1 <- as.numeric(yarima1$pred)
 
-arima1summary <- c(sqrt(arima1$sigma2), mean(abs(ttest-fcvektorarima1)), sqrt(mean((ttest-fcvektorarima1)^2)))
+arima1summary <- c(res_sd = sqrt(arima1$sigma2), 
+                   MAE = mean(abs(ttest-fcvektorarima1)), 
+                   RSE = sqrt(mean((ttest-fcvektorarima1)^2)))
 arima1summary
 
 as.vector(ttest - abs(fcvektorarima1))
@@ -308,9 +329,11 @@ arima2 <- auto.arima(ttrain,
 
 yarima2 <- predict(arima2, 6)
 
-fcvektorarima2 <- c(yarima2$pred[1],yarima2$pred[2],yarima2$pred[3],yarima2$pred[4],yarima2$pred[5],yarima2$pred[6])
+fcvektorarima2 <- as.numeric(yarima2$pred)
 
-arima2summary <- c(sqrt(arima2$sigma2), mean(abs(ttest-fcvektorarima2)), sqrt(mean((ttest-fcvektorarima2)^2)))
+arima2summary <- c(res_sd = sqrt(arima2$sigma2), 
+                   MAE = mean(abs(ttest-fcvektorarima2)), 
+                   RSE = sqrt(mean((ttest-fcvektorarima2)^2)))
 arima2summary
 
 as.vector(ttest - abs(fcvektorarima2))
@@ -326,13 +349,82 @@ autoplot(tdata)+
 #########################
 #7.1 KNN model###########
 #########################
-knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))  
+knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))  #best model
 summary(knn)
 
-fcvektorknn <- c(knn$prediction[1],knn$prediction[2],knn$prediction[3],knn$prediction[4],knn$prediction[5],knn$prediction[6])
+#I used this different combination models, and model with k=9 is best fitted
+knn2 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2), cf = c("mean"))
+knn3 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3), cf = c("mean"))
+knn4 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4), cf = c("mean"))
+knn5 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5), cf = c("mean"))
+knn6 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6), cf = c("mean"))
+knn7 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(7), cf = c("mean"))
+knn8 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(8), cf = c("mean"))
+knn23 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2,3), cf = c("mean")) 
+knn34 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3,4), cf = c("mean")) 
+knn45 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4,5), cf = c("mean")) 
+knn56 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5,6), cf = c("mean"))
+knn67 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6,7), cf = c("mean"))
+knn78 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(7,8), cf = c("mean"))
+knn234 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2,3,4), cf = c("mean"))
+knn345 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3,4,5), cf = c("mean")) 
+knn456 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4,5,6), cf = c("mean")) 
+knn567 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5,6,7), cf = c("mean")) 
+knn678 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6,7,8), cf = c("mean"))
 
-knnsummary <- c(0,mean(abs(ttest-fcvektorknn)), sqrt(mean((ttest-fcvektorknn)^2)))
-knnsummary
+fcvektorknn <- as.numeric(knn$prediction)
+fcvektorknn2 <- as.numeric(knn2$prediction)
+fcvektorknn3 <- as.numeric(knn3$prediction)
+fcvektorknn4 <- as.numeric(knn4$prediction)
+fcvektorknn5 <- as.numeric(knn5$prediction)
+fcvektorknn6 <- as.numeric(knn6$prediction)
+fcvektorknn7 <- as.numeric(knn7$prediction)
+fcvektorknn8 <- as.numeric(knn8$prediction)
+fcvektorknn23 <- as.numeric(knn23$prediction)
+fcvektorknn34 <- as.numeric(knn34$prediction)
+fcvektorknn45 <- as.numeric(knn45$prediction)
+fcvektorknn56 <- as.numeric(knn56$prediction)
+fcvektorknn67 <- as.numeric(knn67$prediction)
+fcvektorknn78 <- as.numeric(knn78$prediction)
+fcvektorknn234 <- as.numeric(knn234$prediction)
+fcvektorknn345 <- as.numeric(knn345$prediction)
+fcvektorknn456 <- as.numeric(knn456$prediction)
+fcvektorknn567 <- as.numeric(knn567$prediction)
+fcvektorknn678 <- as.numeric(knn678$prediction)
+
+#Standard error for KNN is not calculated because there are no residuals or evaluated values for training data,
+#and there are only predicted values for 6 months ahead. We will compare more important other two parametres
+knnsummary <- c(res_sd = 0, 
+                MAE = mean(abs(ttest-fcvektorknn)), 
+                RSE = sqrt(mean((ttest-fcvektorknn)^2)))
+knn2summary <- c(0,mean(abs(ttest-fcvektorknn2)), sqrt(mean((ttest-fcvektorknn2)^2)))
+knn3summary <- c(0,mean(abs(ttest-fcvektorknn3)), sqrt(mean((ttest-fcvektorknn3)^2)))
+knn4summary <- c(0,mean(abs(ttest-fcvektorknn4)), sqrt(mean((ttest-fcvektorknn4)^2)))
+knn5summary <- c(0,mean(abs(ttest-fcvektorknn5)), sqrt(mean((ttest-fcvektorknn5)^2)))
+knn6summary <- c(0,mean(abs(ttest-fcvektorknn6)), sqrt(mean((ttest-fcvektorknn6)^2)))
+knn7summary <- c(0,mean(abs(ttest-fcvektorknn7)), sqrt(mean((ttest-fcvektorknn7)^2)))
+knn8summary <- c(0,mean(abs(ttest-fcvektorknn8)), sqrt(mean((ttest-fcvektorknn8)^2)))
+knn23summary <- c(0,mean(abs(ttest-fcvektorknn23)), sqrt(mean((ttest-fcvektorknn23)^2)))
+knn34summary <- c(0,mean(abs(ttest-fcvektorknn34)), sqrt(mean((ttest-fcvektorknn34)^2)))
+knn45summary <- c(0,mean(abs(ttest-fcvektorknn45)), sqrt(mean((ttest-fcvektorknn45)^2)))
+knn56summary <- c(0,mean(abs(ttest-fcvektorknn56)), sqrt(mean((ttest-fcvektorknn56)^2)))
+knn67summary <- c(0,mean(abs(ttest-fcvektorknn67)), sqrt(mean((ttest-fcvektorknn67)^2)))
+knn78summary <- c(0,mean(abs(ttest-fcvektorknn78)), sqrt(mean((ttest-fcvektorknn78)^2)))
+knn234summary <- c(0,mean(abs(ttest-fcvektorknn234)), sqrt(mean((ttest-fcvektorknn234)^2)))
+knn345summary <- c(0,mean(abs(ttest-fcvektorknn345)), sqrt(mean((ttest-fcvektorknn345)^2)))
+knn456summary <- c(0,mean(abs(ttest-fcvektorknn456)), sqrt(mean((ttest-fcvektorknn456)^2)))
+knn567summary <- c(0,mean(abs(ttest-fcvektorknn567)), sqrt(mean((ttest-fcvektorknn567)^2)))
+knn678summary <- c(0,mean(abs(ttest-fcvektorknn678)), sqrt(mean((ttest-fcvektorknn678)^2)))
+
+comparings[order(comparings$MAE),]<- data.frame(rbind(knnsummary,knn2summary,knn3summary,knn4summary,knn5summary,knn6summary,
+                                                      knn7summary, knn8summary, knn23summary, knn34summary, knn45summary, 
+                                                      knn56summary,knn67summary, knn78summary, knn234summary, knn345summary, 
+                                                      knn456summary, knn567summary, knn678summary),
+                                                row.names = c("KNN9", "KNN2", "KNN3","KNN4", "KNN5", "KNN6", "KNN7", "KNN8",
+                                                              "KNN23", "KNN34", "KNN45", "KNN56", "KNN67", "KNN78",
+                                                              "KNN234", "KNN345", "KNN456", "KNN567", "KNN678"))
+colnames(comparings) <- c("SD Residuals", "MAE", "RMSE")
+comparings
 
 as.vector(ttest - abs(fcvektorknn))
 
@@ -342,14 +434,18 @@ autoplot(tdata)+
 #####################################
 #7.2 Neural Networks models##########
 #####################################
-mlp <- mlp(ttrain, lags=1:12, sel.lag=FALSE, reps = 10000)
+mlp <- mlp(ttrain, lags=1:12, reps = 10000)
 
 plot(mlp)
 
 ymlp <- forecast(mlp, h=6)
-fcvektormlp <- c(ymlp$mean[1],ymlp$mean[2],ymlp$mean[3],ymlp$mean[4],ymlp$mean[5],ymlp$mean[6])
+fcvektormlp <- as.numeric(ymlp$mean)
 
-mlpsummary <- c(0,round(mean(abs(ttest-fcvektormlp)),2), round(sqrt(mean((ttest-fcvektormlp)^2)),2))
+#Standard error for MLP is not calculated because there are no residuals or evaluated values for training data,
+#and there are only predicted values for 6 months ahead. We will compare more important other two parametres
+mlpsummary <- c(res_sd = 0, 
+                MAE = round(mean(abs(ttest-fcvektormlp)),2), 
+                RSE = round(sqrt(mean((ttest-fcvektormlp)^2)),2))
 mlpsummary
 
 as.vector(ttest - abs(fcvektormlp))
@@ -367,22 +463,38 @@ sumarno<- data.frame(rbind(meanfsummary, rwfsummary, rwdsummary, snaivesummary, 
 colnames(sumarno) <- c("SD Residuals", "MAE", "RMSE")
 sumarno
 
+#Plots for Benchmark models
 autoplot(tdata)+
   autolayer(meanf, series = "Mean Method", PI = FALSE)+
   autolayer(rwf, series = "Random walk", PI = FALSE)+
   autolayer(rwd, series = "Drift method", PI = FALSE)+
-  autolayer(snaive, series = "S Naive", PI = FALSE)+
+  autolayer(snaive, series = "S Naive", PI = FALSE)
+
+#Plots for ETS models
+autoplot(tdata)+
   autolayer(sets, series = "Simple ETS", PI = FALSE)+
   autolayer(hw, series = "Holt-Winter", PI = FALSE)+
-  autolayer(aets, series = "Automated ETS", PI = FALSE)+
+  autolayer(aets, series = "Automated ETS", PI = FALSE)
+
+#Plots for ARIMA models
+autoplot(tdata)+
   autolayer(ts(fcvektorma, start = c(2019,10),frequency = 12), series = "MA(1)", PI = FALSE)+
   autolayer(ts(fcvektorar, start = c(2019,10),frequency = 12), series = "AR(1)", PI = FALSE)+
   autolayer(ts(fcvektorarma, start = c(2019,10),frequency = 12), series = "ARMA(1,1)", PI = FALSE)+
   autolayer(ts(fcvektorarima1, start = c(2019,10),frequency = 12), series = "ARIMA(1,0,0)(0,1,0)[12]", PI = FALSE)+
-  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE) + 
+  autolayer(ts(fcvektorarima2, start = c(2019,10),frequency = 12), series = "ARIMA(0,1,3)", PI = FALSE)
+
+#Plots for ML models
+autoplot(tdata)+
   autolayer(ts(fcvektorknn, start = c(2019,10),frequency = 12), series = "KNN k=9", PI = FALSE) + 
   autolayer(ts(fcvektormlp, start = c(2019,10),frequency = 12), series = "Neural network-MLP", PI = FALSE)
 
+#Comparing best from the groups
+autoplot(tdata)+
+  autolayer(rwd, series = "Drift method", PI = FALSE)+
+  autolayer(hw, series = "Holt-Winter", PI = FALSE)+
+  autolayer(ts(fcvektorarima1, start = c(2019,10),frequency = 12), series = "ARIMA(1,0,0)(0,1,0)[12]", PI = FALSE)+
+  autolayer(ts(fcvektormlp, start = c(2019,10),frequency = 12), series = "Neural network-MLP", PI = FALSE)
 
 
 ############################################Appendix#######################################################
