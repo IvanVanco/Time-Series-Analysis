@@ -349,82 +349,43 @@ autoplot(tdata)+
 #########################
 #7.1 KNN model###########
 #########################
+#I used this different combination models, and model with k=9 is best fitted
+knn_comparison <- list()
+i <- 1
+for(k in 2:9) {
+  knn_fit <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(k), cf = c("mean"))
+  knn_pred <- as.numeric(knn_fit$prediction)
+  knn_comparison[[i]] <- list(k = k, MAE = mean(abs(ttest-knn_pred)), RMSE = sqrt(mean((ttest-knn_pred)^2)))
+  i <- i + 1
+}
+for(k in 2:8) {
+  knn_fit <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(k,k+1), cf = c("mean"))
+  knn_pred <- as.numeric(knn_fit$prediction)
+  knn_comparison[[i]] <- list(k = paste0("(",k,",",k+1,")"), 
+                              MAE = mean(abs(ttest-knn_pred)), RMSE = sqrt(mean((ttest-knn_pred)^2)))
+  i <- i + 1
+}
+for(k in 2:7) {
+  knn_fit <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(k,k+1,k+2), cf = c("mean"))
+  knn_pred <- as.numeric(knn_fit$prediction)
+  knn_comparison[[i]] <- list(k = paste0("(",k,",",k+1,",",k+2,")"), 
+                              MAE = mean(abs(ttest-knn_pred)), RMSE = sqrt(mean((ttest-knn_pred)^2)))
+  i <- i + 1
+}
+
+knn_comparison_df <- do.call(rbind.data.frame, knn_comparison)
+View(knn_comparison_df[order(knn_comparison_df$RMSE),])
+
 knn <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(9), cf = c("mean"))  #best model
 summary(knn)
 
-#I used this different combination models, and model with k=9 is best fitted
-knn2 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2), cf = c("mean"))
-knn3 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3), cf = c("mean"))
-knn4 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4), cf = c("mean"))
-knn5 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5), cf = c("mean"))
-knn6 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6), cf = c("mean"))
-knn7 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(7), cf = c("mean"))
-knn8 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(8), cf = c("mean"))
-knn23 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2,3), cf = c("mean")) 
-knn34 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3,4), cf = c("mean")) 
-knn45 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4,5), cf = c("mean")) 
-knn56 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5,6), cf = c("mean"))
-knn67 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6,7), cf = c("mean"))
-knn78 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(7,8), cf = c("mean"))
-knn234 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(2,3,4), cf = c("mean"))
-knn345 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(3,4,5), cf = c("mean")) 
-knn456 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(4,5,6), cf = c("mean")) 
-knn567 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(5,6,7), cf = c("mean")) 
-knn678 <- knn_forecasting(ttrain, h = 6, lags = 1:12, k = c(6,7,8), cf = c("mean"))
-
 fcvektorknn <- as.numeric(knn$prediction)
-fcvektorknn2 <- as.numeric(knn2$prediction)
-fcvektorknn3 <- as.numeric(knn3$prediction)
-fcvektorknn4 <- as.numeric(knn4$prediction)
-fcvektorknn5 <- as.numeric(knn5$prediction)
-fcvektorknn6 <- as.numeric(knn6$prediction)
-fcvektorknn7 <- as.numeric(knn7$prediction)
-fcvektorknn8 <- as.numeric(knn8$prediction)
-fcvektorknn23 <- as.numeric(knn23$prediction)
-fcvektorknn34 <- as.numeric(knn34$prediction)
-fcvektorknn45 <- as.numeric(knn45$prediction)
-fcvektorknn56 <- as.numeric(knn56$prediction)
-fcvektorknn67 <- as.numeric(knn67$prediction)
-fcvektorknn78 <- as.numeric(knn78$prediction)
-fcvektorknn234 <- as.numeric(knn234$prediction)
-fcvektorknn345 <- as.numeric(knn345$prediction)
-fcvektorknn456 <- as.numeric(knn456$prediction)
-fcvektorknn567 <- as.numeric(knn567$prediction)
-fcvektorknn678 <- as.numeric(knn678$prediction)
 
 #Standard error for KNN is not calculated because there are no residuals or evaluated values for training data,
 #and there are only predicted values for 6 months ahead. We will compare more important other two parametres
 knnsummary <- c(res_sd = 0, 
                 MAE = mean(abs(ttest-fcvektorknn)), 
                 RSE = sqrt(mean((ttest-fcvektorknn)^2)))
-knn2summary <- c(0,mean(abs(ttest-fcvektorknn2)), sqrt(mean((ttest-fcvektorknn2)^2)))
-knn3summary <- c(0,mean(abs(ttest-fcvektorknn3)), sqrt(mean((ttest-fcvektorknn3)^2)))
-knn4summary <- c(0,mean(abs(ttest-fcvektorknn4)), sqrt(mean((ttest-fcvektorknn4)^2)))
-knn5summary <- c(0,mean(abs(ttest-fcvektorknn5)), sqrt(mean((ttest-fcvektorknn5)^2)))
-knn6summary <- c(0,mean(abs(ttest-fcvektorknn6)), sqrt(mean((ttest-fcvektorknn6)^2)))
-knn7summary <- c(0,mean(abs(ttest-fcvektorknn7)), sqrt(mean((ttest-fcvektorknn7)^2)))
-knn8summary <- c(0,mean(abs(ttest-fcvektorknn8)), sqrt(mean((ttest-fcvektorknn8)^2)))
-knn23summary <- c(0,mean(abs(ttest-fcvektorknn23)), sqrt(mean((ttest-fcvektorknn23)^2)))
-knn34summary <- c(0,mean(abs(ttest-fcvektorknn34)), sqrt(mean((ttest-fcvektorknn34)^2)))
-knn45summary <- c(0,mean(abs(ttest-fcvektorknn45)), sqrt(mean((ttest-fcvektorknn45)^2)))
-knn56summary <- c(0,mean(abs(ttest-fcvektorknn56)), sqrt(mean((ttest-fcvektorknn56)^2)))
-knn67summary <- c(0,mean(abs(ttest-fcvektorknn67)), sqrt(mean((ttest-fcvektorknn67)^2)))
-knn78summary <- c(0,mean(abs(ttest-fcvektorknn78)), sqrt(mean((ttest-fcvektorknn78)^2)))
-knn234summary <- c(0,mean(abs(ttest-fcvektorknn234)), sqrt(mean((ttest-fcvektorknn234)^2)))
-knn345summary <- c(0,mean(abs(ttest-fcvektorknn345)), sqrt(mean((ttest-fcvektorknn345)^2)))
-knn456summary <- c(0,mean(abs(ttest-fcvektorknn456)), sqrt(mean((ttest-fcvektorknn456)^2)))
-knn567summary <- c(0,mean(abs(ttest-fcvektorknn567)), sqrt(mean((ttest-fcvektorknn567)^2)))
-knn678summary <- c(0,mean(abs(ttest-fcvektorknn678)), sqrt(mean((ttest-fcvektorknn678)^2)))
-
-comparings[order(comparings$MAE),]<- data.frame(rbind(knnsummary,knn2summary,knn3summary,knn4summary,knn5summary,knn6summary,
-                                                      knn7summary, knn8summary, knn23summary, knn34summary, knn45summary, 
-                                                      knn56summary,knn67summary, knn78summary, knn234summary, knn345summary, 
-                                                      knn456summary, knn567summary, knn678summary),
-                                                row.names = c("KNN9", "KNN2", "KNN3","KNN4", "KNN5", "KNN6", "KNN7", "KNN8",
-                                                              "KNN23", "KNN34", "KNN45", "KNN56", "KNN67", "KNN78",
-                                                              "KNN234", "KNN345", "KNN456", "KNN567", "KNN678"))
-colnames(comparings) <- c("SD Residuals", "MAE", "RMSE")
-comparings
 
 as.vector(ttest - abs(fcvektorknn))
 
